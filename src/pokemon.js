@@ -1,11 +1,52 @@
 import React from 'react';
 import './App.css';
-// const { useEffect, useState } = React;
+//  const { useEffect, useState } = React;
 
 
-// const Pokemon = () => {
+//  const Pokemon = (props) => {
+//     const [dataLoaded, setDataLoaded] = useState(null);
+//     const [pokemonData, setPokemonData] = useState(null);
+//     const [spriteLoaded, setSpriteLoaded] = useState(false);
+//     const [viewingPokemonInDepth, setViewingPokemonInDepth] = useState(false);
 
-// }
+//      let fetchData = (url) => {
+//          fetch(url)
+//              .then(result => result.json())
+//              .then(
+//                  (result) => {
+//                      setDataLoaded(true);
+//                      setPokemonData(result);
+//                  },
+//                  (error) => {
+//                      console.log(`Error loading pokemon data for ${props.data.name}`)
+//                  })
+//      };
+
+//      let imageClickCallback = () => {
+//          setViewingPokemonInDepth(true);
+//      };
+
+//      let viewSinglePokemon = (data) => {
+//          props.singlePokemonCallback(pokemonData);
+//      };
+
+//     const pokeName = props.data.name.charAt(0).toUpperCase() + props.data.name.slice(1);
+     
+//     return (
+//         <div className={"pokemonEntry"}>
+//                 <div>
+//                     {dataLoaded ?
+//                         pokeName :
+//                         `${props.data.name} not yet loaded...`}
+//                 </div>
+//                 <div>
+//                     {dataLoaded ?
+//                         <img onClick={viewSinglePokemon} src={pokemonData.sprites.front_default} alt={props.data.name} width={100} height={100} /> :
+//                         `${props.data.name} image not yet loaded...`}
+//                 </div>
+//             </div>
+//     );
+//  }
 
 class Pokemon extends React.Component
 {
@@ -74,4 +115,4 @@ class Pokemon extends React.Component
     }
 }
 
-export default Pokemon;
+ export default Pokemon;
