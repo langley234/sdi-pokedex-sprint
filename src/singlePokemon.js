@@ -9,12 +9,16 @@ class SinglePokemon extends React.Component
         super(props);
     }
 
+    componentDidMount() {
+       console.log('CREATING SINGLE POKEMON');
+    }
+
     // ********************************CALLBACKS*********************************** //
     // ********************************END CALLBACKS*********************************** //
 
     render()
     {
-        console.log('forms : ', this.props.data.forms);
+        //console.log('forms : ', this.props.data.forms);
         const pokeName = this.props.data.name.charAt(0).toUpperCase() + this.props.data.name.slice(1);
         return (
             <div class={`pokePage`}>

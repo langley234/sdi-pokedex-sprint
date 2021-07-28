@@ -1,8 +1,15 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react';
+import About from './about.js';
 import Pokemon from './pokemon';
 import SinglePokemon from './singlePokemon.js';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+} from 'react-router-dom';
 
 let MAX_DATA = 151;
 
@@ -34,10 +41,14 @@ class App extends React.Component
 
   componentDidMount() 
   {
+    console.log('CREATING APP.JS');
+
     // fetch the pokemon data that contains a name and url to get more specific data
     this.fetchData(`https://pokeapi.co/api/v2/pokemon?limit=${MAX_DATA}`);
     // fetch a list of types of pokemon to use for the drop-down selector
     this.fetchTypes(`https://pokeapi.co/api/v2/type`);
+
+    console.log('FINISHED FETCHING');
   }
 
   fetchData(url = `https://pokeapi.co/api/v2/pokemon/ditto`)
@@ -52,6 +63,7 @@ class App extends React.Component
           showingMainPage: true,
           showingLoadingPage: false
         });
+        
       },
       (error) => {
         console.log(`Error loading pokemon data in App.js`)
@@ -76,11 +88,12 @@ class App extends React.Component
   // ********************************CALLBACKS*********************************** //
   viewSinglePokemon(data) {
     //console.log('data received form pokemon ' ,data);
-    this.setState({
-      showingMainPage: false,
-      showingSinglePokePage: true,
-      singlePokemonData: data
-    });
+    //window.history.replaceState(null, "New Page Title", `/pokemon/${data.name}`)
+     this.setState({
+    //   showingMainPage: false,
+    //   showingSinglePokePage: true,
+       singlePokemonData: data
+     });
   }
 
   stopViewingSinglePokemon() {
@@ -114,38 +127,58 @@ class App extends React.Component
     else if (this.state.showingMainPage)
     {
       return (
-        <div className="App">
-          <header className="App-header">
-            <div>
-              <select name="type-selector" id="pokemon-type-sort">
-              <option onSelect={`this.typeSortSelected`}>No Type</option>
-                {
-                  
-                  this.state.typeDataLoaded ?
-                  this.state.pokemonTypeData.map((item) => {
-                  return <option name={item.name}>{item.name}</option>}) :
-                  <option>Loading...</option>
-                }
-              </select>
-            </div>
-            <div id= "grid-container">
-              {this.state.pokemonData.map((item) => {
-                return <Pokemon key={this.index++} data={item} singlePokemonCallback={this.viewSinglePokemon}/>
-              })}
-            </div>      
-          </header>
-          <div>
-            <a href="./aboutUs.html">About Us</a>
-          </div>
-        </div>
+        <Router>
+          <Switch>
+            <Route exact path="/">
+              <div className="App">
+                <header className="App-header">
+                  <div>
+                    <select name="type-selector" id="pokemon-type-sort">
+                      <option onSelect={`this.typeSortSelected`}>No Type</option>
+                      {
+
+                        this.state.typeDataLoaded ?
+                          this.state.pokemonTypeData.map((item) => {
+                            return <option name={item.name}>{item.name}</option>
+                          }) :
+                          <option>Loading...</option>
+                      }
+                    </select>
+                  </div>
+                  <div id="grid-container">
+                    {this.state.pokemonData.map((item) => {
+                      return <Pokemon key={this.index++} data={item} singlePokemonCallback={this.viewSinglePokemon} />
+                    })}
+                  </div>
+                </header>
+              </div>
+              <div>
+                <ul>
+                  <li>
+                    <Link to="/about">About</Link>
+                  </li>
+                </ul>
+              </div>
+            </Route>
+
+            <Route path="/about">
+              <About />
+            </Route>
+            
+            <Route path={`/pokemon/`}>
+              <SinglePokemon data={this.state.singlePokemonData} returnCallback={this.stopViewingSinglePokemon} />
+            </Route>
+          </Switch>
+        </Router>
       )
+        
+        
     }
-    else if (this.state.showingSinglePokePage)
-    {
-      return (
-        <SinglePokemon data={this.state.singlePokemonData} returnCallback={this.stopViewingSinglePokemon} />
-      );
-    }
+    // else if (this.state.showingSinglePokePage) {
+    //   return (
+    //     <SinglePokemon data={this.state.singlePokemonData} returnCallback={this.stopViewingSinglePokemon} />
+    //   );
+    //}
   }
 }
 
