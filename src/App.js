@@ -11,6 +11,9 @@ import {
   Link,
 } from 'react-router-dom';
 
+let HOME_PATH = '';
+let POKEMON_PATH = '/pokemon'
+
 let MAX_DATA = 151;
 
 class App extends React.Component 
@@ -21,14 +24,20 @@ class App extends React.Component
     
     this.state = {
       dataLoaded: false,
-      pokemonData: null,
+      summaryPokemonData: null,
+      detailedPokemonData: null,
       typeDataLoaded: false,
       pokemonTypeData: null,
       showingLoadingPage: true,
       showingMainPage: false,
       showingSinglePokePage: false,
-      singlePokemonData: null
+      singlePokemonData: null,
+      pageNotFound: false
     }
+
+    this.detailedPokemonData = [];
+    this.summaryPokemonData = [];
+    this.path = '';
 
     this.index = 0;
 
@@ -41,33 +50,87 @@ class App extends React.Component
 
   componentDidMount() 
   {
-    console.log('CREATING APP.JS');
-
     // fetch the pokemon data that contains a name and url to get more specific data
     this.fetchData(`https://pokeapi.co/api/v2/pokemon?limit=${MAX_DATA}`);
     // fetch a list of types of pokemon to use for the drop-down selector
     this.fetchTypes(`https://pokeapi.co/api/v2/type`);
 
-    console.log('FINISHED FETCHING');
+    // resolve path name
+    if (window.location.pathname.toString() !== HOME_PATH && window.location.pathname.toString() !== `/`)
+    {
+      let name = window.location.pathname;
+      if (!name.includes(POKEMON_PATH))
+      {
+        this.setState({
+          pageNotFound: true,
+          showingLoadingPage: false
+        })
+      }
+      name = name.substring(name.lastIndexOf('/') + 1);
+      this.path = name;
+    }
   }
 
-  fetchData(url = `https://pokeapi.co/api/v2/pokemon/ditto`)
-  {
+  fetchData(url = `https://pokeapi.co/api/v2/pokemon/ditto`) {
     fetch(url)
       .then(result => result.json())
       .then((result) => {
-        //console.log('result in data fetch call : ', result.results);
-        this.setState({
-          dataLoaded: true,
-          pokemonData: result.results,
-          showingMainPage: true,
-          showingLoadingPage: false
-        });
-        
-      },
-      (error) => {
-        console.log(`Error loading pokemon data in App.js`)
-    })
+        this.summaryPokemonData = result.results;
+      })
+      .then(() => {
+        Promise.all(this.summaryPokemonData.map((item) => {
+          return fetch(item.url)
+            .then(result => result.json())
+            .then((result) => {
+              //console.log('ppp');
+              this.detailedPokemonData.push(result);
+            })
+        }))
+          .then(() => {
+            // console.log(this.detailedPokemonData);
+            // console.log("DONE");
+
+            console.log('PATH HERE', this.path);
+
+            if (this.path === HOME_PATH) {
+              //console.log('executing here');
+              this.setState({
+                summaryPokemonData: this.summaryPokemonData,
+                showingMainPage: true,
+                showingLoadingPage: false,
+                detailedPokemonData: this.detailedPokemonData,
+                dataLoaded: true
+              });
+            }
+            else {
+              let pageFound = false;
+
+              for (let i = 0; i < this.detailedPokemonData.length; i++) {
+                if (this.detailedPokemonData[i].name === this.path) {
+                  pageFound = true;
+                  this.setState({
+                    summaryPokemonData: this.summaryPokemonData,
+                    showingMainPage: true,
+                    showingLoadingPage: false,
+                    detailedPokemonData: this.detailedPokemonData,
+                    dataLoaded: true,
+                    singlePokemonData: this.detailedPokemonData[i]
+                  })
+                }
+              }
+
+              if (!pageFound)
+              {
+                this.setState({
+                  pageNotFound: true,
+                  showingLoadingPage: false
+                });
+              }  
+            }
+          })
+      })
+
+
   }
 
   fetchTypes(url = `https://pokeapi.co/api/v2/type`)
@@ -75,7 +138,7 @@ class App extends React.Component
     fetch(url)
       .then(result => result.json())
       .then((result) => {
-        console.log('result in type fetch call : ', result.results);
+       // console.log('result in type fetch call : ', result.results);
         this.setState({
           typeDataLoaded: true,
           pokemonTypeData: result.results
@@ -87,11 +150,7 @@ class App extends React.Component
   }
   // ********************************CALLBACKS*********************************** //
   viewSinglePokemon(data) {
-    //console.log('data received form pokemon ' ,data);
-    //window.history.replaceState(null, "New Page Title", `/pokemon/${data.name}`)
      this.setState({
-    //   showingMainPage: false,
-    //   showingSinglePokePage: true,
        singlePokemonData: data
      });
   }
@@ -104,9 +163,8 @@ class App extends React.Component
   }
 
   typeSortSelected() {
-    let x = document.getElementById('pokemon-type-sort');
+    //let x = document.getElementById('pokemon-type-sort');
 
-    console.log('type : ', x);
   }
   //******************************END CALLBACKS********************************** //
 
@@ -119,8 +177,16 @@ class App extends React.Component
             <img src={logo} className="App-logo" alt="logo" />      
           </header>
           <div>
-            <a>About Us</a>
+            <button>About Us</button>
           </div>
+        </div>
+      );
+    }
+    else if (this.state.pageNotFound)
+    {
+      return (
+        <div>
+          <h2>Page Not Found</h2>
         </div>
       );
     }
@@ -134,19 +200,20 @@ class App extends React.Component
                 <header className="App-header">
                   <div>
                     <select name="type-selector" id="pokemon-type-sort">
-                      <option onSelect={`this.typeSortSelected`}>No Type</option>
+                      <option onSelect={this.typeSortSelected}>No Type</option>
                       {
 
                         this.state.typeDataLoaded ?
                           this.state.pokemonTypeData.map((item) => {
-                            return <option name={item.name}>{item.name}</option>
+                            return <option key={this.index++} name={item.name}>{item.name}</option>
                           }) :
                           <option>Loading...</option>
                       }
                     </select>
                   </div>
                   <div id="grid-container">
-                    {this.state.pokemonData.map((item) => {
+                    {console.log(`path : ${window.location.pathname}`)}
+                    {this.state.detailedPokemonData.map((item) => {
                       return <Pokemon key={this.index++} data={item} singlePokemonCallback={this.viewSinglePokemon} />
                     })}
                   </div>

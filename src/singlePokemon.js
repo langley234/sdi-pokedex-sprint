@@ -1,7 +1,9 @@
 import React from 'react';
 import './App.css';
 //import React, { useState } from 'react';
-
+import {   
+    Link
+  } from 'react-router-dom';
 class SinglePokemon extends React.Component
 {
     constructor(props)
@@ -39,7 +41,11 @@ class SinglePokemon extends React.Component
                 
                 <button onClick={this.props.returnCallback}>Click to Return</button>
                 <div>
-                    <a href="./aboutUs.html">About Us</a>
+                    <ul>
+                        <li>
+                            <Link to="/about">About</Link>
+                        </li>
+                    </ul>
                 </div>
             </div>
         );

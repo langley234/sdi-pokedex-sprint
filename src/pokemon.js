@@ -1,9 +1,6 @@
 import React from 'react';
 import './App.css';
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
     Link
   } from 'react-router-dom';
  const { useEffect, useState } = React;
@@ -14,24 +11,9 @@ import {
     const [pokemonData, setPokemonData] = useState(null);
     const [spriteLoaded, setSpriteLoaded] = useState(false);
     const [viewingPokemonInDepth, setViewingPokemonInDepth] = useState(false);
-
-     let fetchData = (url) => {
-         fetch(url)
-             .then(result => result.json())
-             .then(
-                 (result) => {
-                     //setDataLoaded(true);
-                     setPokemonData(result);
-                 },
-                 (error) => {
-                     console.log(`Error loading pokemon data for ${props.data.name}`)
-                 })
-     };
      
-    useEffect(() => {
-        console.log('PING');
-        
-        fetchData(props.data.url);
+    useEffect(() => {        
+        setPokemonData(props.data);
     }, [dataLoaded]);
 
      let imageClickCallback = () => {
@@ -39,14 +21,12 @@ import {
      };
 
      let viewSinglePokemon = (data) => {
-         //console.log('PROPS : ', props);
          props.singlePokemonCallback(pokemonData);
      };
 
     const pokeName = props.data.name.charAt(0).toUpperCase() + props.data.name.slice(1);
      
      return (
-        //LINK
          <div className={"pokemonEntry"}>
              
              <div>
